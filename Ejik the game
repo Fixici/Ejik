@@ -1,1 +1,31 @@
+import pygame
+import os
+os.environ["SDL_AUDIODRIVER"] = "dummy"
+#Инициализация Pygame
+pygame.init()
+
+#Константы
+width, height = 800, 600
+white = (255, 255, 255)
+
+#Создание окна
+Screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Ёжик собирает еду")
+
+#Игровой цикл
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type== pygame.QUIT:
+            running = False
+
+#Заливка фона
+Screen.fill(white)
+
+#Обновление экрана
+pygame.display.flip()
+
+#Завершение
+pygame.time.delay(5000)
+pygame.quit()
 
