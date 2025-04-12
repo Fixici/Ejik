@@ -25,6 +25,17 @@ Screen.fill(white)
 #Обновление экрана
 pygame.display.flip()
 
+#Создание персонажа
+player = pygame.Rect(100, 500, 50,50) #Позиция и размер ежика
+
+#Добавляем отрисовку персонажа
+pygame.draw.rect(screen, (0, 0, 255), player) #Цвет у ежика сделаем синий (Как в рассказе -"Синие листья") :)
+
+#Создание земли с травкой (платформы)
+platform = pygame.Rect(0, height -50, width, 50) #Платформа снизу экрана
+pygame.draw.rect(screen, (0, 128, 0), platform) #Зеленая земля
+
+
 #Завершение
 pygame.time.delay(5000)
 pygame.quit()
