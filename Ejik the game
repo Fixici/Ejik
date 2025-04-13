@@ -39,9 +39,9 @@ SPEED = 5
 #Управление ежиком
 keys = pygame.key.get_pressed()
 if keys[pygame.K_LEFT]:
-player.x -= SPEED
+    player.x -= SPEED
 if keys[pygame.K_RIGHT]:
-player.x += SPEED
+    player.x += SPEED
 
 GRAVITY = 0.5
 JUMP_POWER = -10
@@ -52,15 +52,15 @@ on_ground = False
 velocity_y += GRAVITY
 player.y += velocity_y
 
-if player.colliderect(platform): #Проверка стоит ли ежик на платформе
-player.y = platform.y - player.height
-velocity_y = 0
-on_ground = True
+if player.colliderect(platform):  # Проверка, стоит ли ежик на платформе
+    player.y = platform.y - player.height
+    velocity_y = 0
+    on_ground = True
 
 #Прыжок на пробел
 if keys[pygame.K_SPACE] and on_ground:
-velocity_y = JUMP_POWER
-on_ground = False
+    velocity_y = JUMP_POWER
+    on_ground = False
 
 
 #Завершение
