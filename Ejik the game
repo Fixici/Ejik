@@ -35,6 +35,33 @@ pygame.draw.rect(Screen, (0, 0, 255), player) #Цвет у ежика сдела
 platform = pygame.Rect(0, height -50, width, 50) #Платформа снизу экрана
 pygame.draw.rect(Screen, (0, 128, 0), platform) #Зеленая земля
 
+SPEED = 5
+#Управление ежиком
+keys = pygame.key.get_pressed()
+if keys[pygame.K_LEFT]:
+player.x -= SPEED
+if keys[pygame.K_RIGHT]:
+player.x += SPEED
+
+GRAVITY = 0.5
+JUMP_POWER = -10
+velocity_y = 0
+on_ground = False
+
+#Гравитация и прыжок
+velocity_y += GRAVITY
+player.y += velocity_y
+
+if player.colliderect(platform): #Проверка стоит ли ежик на платформе
+player.y = platform.y - player.height
+velocity_y = 0
+on_ground = True
+
+#Прыжок на пробел
+if keys[pygame.K_SPACE] and on_ground:
+velocity_y = JUMP_POWER
+on_ground = False
+
 
 #Завершение
 pygame.time.delay(5000)
