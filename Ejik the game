@@ -1,69 +1,135 @@
 import pygame
-import os
-os.environ["SDL_AUDIODRIVER"] = "dummy"
-#Инициализация Pygame
+import random
+
+# Инициализация Pygame
 pygame.init()
 
-#Константы
-width, height = 800, 600
-white = (255, 255, 255)
+# Константы
+WIDTH, HEIGHT = 800, 600
+GRAVITY = 0.5
+SPEED = 5
+JUMP_POWER = -10
+TIME_LIMIT = 60  # Время игры в секундах
+SPAWN_INTERVAL = 2000  # Частота появления новых предметов (2 секунды)
 
-#Создание окна
-Screen = pygame.display.set_mode((width, height))
+# Цвета
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+GREEN = (0, 128, 0)
+RED = (255, 0, 0)  # Красные - яблоки
+BROWN = (139, 69, 19)  # Коричневые - грибы
+BLACK = (0, 0, 0)
+
+# Создание окна
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Ёжик собирает еду")
 
-#Игровой цикл
+# Загрузка спрайтов
+player = pygame.Rect(100, 500, 50, 50)
+platform = pygame.Rect(0, HEIGHT - 50, WIDTH, 50)
+
+# Создание списков объектов для сбора
+apples = []
+mushrooms = []
+
+# Переменные
+clock = pygame.time.Clock()
 running = True
-while running:
-    for event in pygame.event.get():
-        if event.type== pygame.QUIT:
-            running = False
-
-#Заливка фона
-Screen.fill(white)
-
-#Обновление экрана
-pygame.display.flip()
-
-#Создание персонажа
-player = pygame.Rect(100, 500, 50,50) #Позиция и размер ежика
-
-#Добавляем отрисовку персонажа
-pygame.draw.rect(Screen, (0, 0, 255), player) #Цвет у ежика сделаем синий (Как в рассказе -"Синие листья") :)
-
-#Создание земли с травкой (платформы)
-platform = pygame.Rect(0, height -50, width, 50) #Платформа снизу экрана
-pygame.draw.rect(Screen, (0, 128, 0), platform) #Зеленая земля
-
-SPEED = 5
-#Управление ежиком
-keys = pygame.key.get_pressed()
-if keys[pygame.K_LEFT]:
-    player.x -= SPEED
-if keys[pygame.K_RIGHT]:
-    player.x += SPEED
-
-GRAVITY = 0.5
-JUMP_POWER = -10
 velocity_y = 0
 on_ground = False
+apple_count = 0
+mushroom_count = 0
+start_ticks = pygame.time.get_ticks()
+spawn_timer = pygame.time.get_ticks()  # Таймер появления новых предметов
 
-#Гравитация и прыжок
-velocity_y += GRAVITY
-player.y += velocity_y
+# Игровой цикл
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-if player.colliderect(platform):  # Проверка, стоит ли ежик на платформе
-    player.y = platform.y - player.height
-    velocity_y = 0
-    on_ground = True
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        player.x -= SPEED
+    if keys[pygame.K_RIGHT]:
+        player.x += SPEED
+    if keys[pygame.K_SPACE] and on_ground:
+        velocity_y = JUMP_POWER
+        on_ground = False
 
-#Прыжок на пробел
-if keys[pygame.K_SPACE] and on_ground:
-    velocity_y = JUMP_POWER
-    on_ground = False
+    velocity_y += GRAVITY
+    player.y += velocity_y
 
+    # Телепортация при выходе за границы экрана
+    if player.x < 0:
+        player.x = WIDTH
+    if player.x > WIDTH:
+        player.x = 0
 
-#Завершение
-pygame.time.delay(5000)
+    # Коллизия с платформой
+    if player.colliderect(platform):
+        player.y = platform.y - player.height
+        velocity_y = 0
+        on_ground = True
+
+    # Сбор яблок
+    for apple in apples[:]:
+        if player.colliderect(apple):
+            apples.remove(apple)
+            apple_count += 1
+
+    # Сбор грибов
+    for mushroom in mushrooms[:]:
+        if player.colliderect(mushroom):
+            mushrooms.remove(mushroom)
+            mushroom_count += 1
+
+    # Появление новых предметов каждые 2 секунды
+    if pygame.time.get_ticks() - spawn_timer > SPAWN_INTERVAL:
+        if random.choice([True, False]):  # 50% шанс появления яблока или гриба
+            apples.append(pygame.Rect(random.randint(50, WIDTH - 50), random.randint(400, HEIGHT - 80), 30, 30))
+        else:
+            mushrooms.append(pygame.Rect(random.randint(50, WIDTH - 50), random.randint(400, HEIGHT - 80), 30, 30))
+        spawn_timer = pygame.time.get_ticks()
+
+    # Таймер
+    elapsed_time = (pygame.time.get_ticks() - start_ticks) // 1000
+    if elapsed_time >= TIME_LIMIT:
+        running = False
+
+    # Отображение объектов и времени
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, BLUE, player)
+    pygame.draw.rect(screen, GREEN, platform)
+
+    for apple in apples:
+        pygame.draw.rect(screen, RED, apple)
+
+    for mushroom in mushrooms:
+        pygame.draw.rect(screen, BROWN, mushroom)
+
+    font = pygame.font.Font(None, 36)
+    text = font.render(f"Время: {TIME_LIMIT - elapsed_time} сек", True, BLACK)
+    screen.blit(text, (10, 10))
+
+    pygame.display.flip()
+    clock.tick(30)
+
+# Вывод финального результата на экран
+screen.fill(WHITE)
+font = pygame.font.Font(None, 48)
+result_text = font.render(f"Ёжик успел собрать за 1 минуту:", True, BLACK)
+apples_text = font.render(f"- Яблок: {apple_count} шт.", True, RED)
+mushrooms_text = font.render(f"- Грибов: {mushroom_count} шт.", True, BROWN)
+thank_you_text_1 = font.render("Спасибо, теперь детки ежика", True, BLACK)
+thank_you_text_2 = font.render("не останутся голодными!", True, BLACK)
+
+screen.blit(result_text, (WIDTH//2 - 200, HEIGHT//2 - 100))
+screen.blit(apples_text, (WIDTH//2 - 200, HEIGHT//2 - 50))
+screen.blit(mushrooms_text, (WIDTH//2 - 200, HEIGHT//2))
+screen.blit(thank_you_text_1, (WIDTH//2 - 250, HEIGHT//2 + 50))
+screen.blit(thank_you_text_2, (WIDTH//2 - 250, HEIGHT//2 + 100))
+
+pygame.display.flip()
+pygame.time.delay(30000)  # Финальный экран видим 30 секунд
 pygame.quit()
-
