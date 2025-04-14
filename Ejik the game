@@ -102,11 +102,18 @@ while running:
     pygame.draw.rect(screen, BLUE, player)
     pygame.draw.rect(screen, GREEN, platform)
 
+    # Отрисовка яблок
     for apple in apples:
-        pygame.draw.rect(screen, RED, apple)
-
+    pygame.draw.circle(screen, RED, (apple.x + apple.width // 2, apple.y + apple.height // 2), apple.width // 2)
+    
+    # Отрисовка грибов
     for mushroom in mushrooms:
-        pygame.draw.rect(screen, BROWN, mushroom)
+    points = [
+        (mushroom.x, mushroom.y + mushroom.height),  # нижний левый угол
+        (mushroom.x + mushroom.width // 2, mushroom.y),  # верхняя точка
+        (mushroom.x + mushroom.width, mushroom.y + mushroom.height)  # нижний правый угол
+    ]
+    pygame.draw.polygon(screen, BROWN, points)
 
     font = pygame.font.Font(None, 36)
     text = font.render(f"Время: {TIME_LIMIT - elapsed_time} сек", True, BLACK)
